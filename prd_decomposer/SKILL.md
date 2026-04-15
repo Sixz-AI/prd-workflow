@@ -75,58 +75,49 @@ Before generating any files, ask the user for the target project path — the pr
 
 > "请提供目标项目的绝对路径（prd_executor skill 和 breakdown 文档将直接输出到该项目）。如果未提供，将输出到当前工作区的 `docs/` 目录下。"
 
-Once confirmed, locate this skill repository and run the setup.
+Once confirmed, locate the installed skills and run the setup.
 
 **macOS / Linux:**
 
 ```bash
-# Detect prd-workflow repo location
-PRD_WORKFLOW_ROOT=""
-for CANDIDATE in \
-  "$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")/../.." 2>/dev/null && pwd)" \
-  "$HOME/Documents/code/ai/prd-workflow" \
-  "$(pwd)/.claude/skills/.."; do
-  if [ -d "$CANDIDATE/prd_executor" ] && [ -d "$CANDIDATE/prd_decomposer" ]; then
-    PRD_WORKFLOW_ROOT="$CANDIDATE"
-    break
-  fi
-done
+# Skills are installed in this project's .claude/skills/
+# (run install.sh from the cloned repo to set this up first)
+SKILLS_DIR="$(pwd)/.claude/skills"
+EXECUTOR_SRC="$SKILLS_DIR/prd_executor"
+SCRIPTS_DIR="$SKILLS_DIR/prd_decomposer/scripts"
 
 # 1. Copy prd_executor into the target project (skip if already exists)
 TARGET_SKILLS="[TARGET_PROJECT]/.claude/skills"
 if [ ! -d "$TARGET_SKILLS/prd_executor" ]; then
   mkdir -p "$TARGET_SKILLS"
-  cp -r "$PRD_WORKFLOW_ROOT/prd_executor" "$TARGET_SKILLS/prd_executor"
+  cp -r "$EXECUTOR_SRC" "$TARGET_SKILLS/prd_executor"
   echo "✓ prd_executor installed → $TARGET_SKILLS/prd_executor"
 fi
 
 # 2. Initialize breakdown directory and README
-bash "$PRD_WORKFLOW_ROOT/prd_decomposer/scripts/generate_readme.sh" \
+bash "$SCRIPTS_DIR/generate_readme.sh" \
   "[TARGET_PROJECT]/docs/[Feature_Name]_breakdown" "[Feature Name]"
 ```
 
 **Windows (PowerShell):**
 
 ```powershell
-# Detect prd-workflow repo location
-$PRD_WORKFLOW_ROOT = @(
-  (Join-Path $PSScriptRoot "..\.." | Resolve-Path -ErrorAction SilentlyContinue),
-  "$HOME\Documents\code\ai\prd-workflow",
-  (Join-Path (Get-Location) ".claude\skills\..")
-) | Where-Object { $_ -and (Test-Path "$_\prd_executor") -and (Test-Path "$_\prd_decomposer") } |
-    Select-Object -First 1
+# Skills are installed in this project's .claude/skills/
+$SkillsDir   = Join-Path (Get-Location) ".claude\skills"
+$ExecutorSrc = Join-Path $SkillsDir "prd_executor"
+$ScriptsDir  = Join-Path $SkillsDir "prd_decomposer\scripts"
 
 # 1. Copy prd_executor into the target project (skip if already exists)
-$TARGET_SKILLS = "[TARGET_PROJECT]\.claude\skills"
-$executorDest = Join-Path $TARGET_SKILLS "prd_executor"
+$TargetSkills  = "[TARGET_PROJECT]\.claude\skills"
+$executorDest  = Join-Path $TargetSkills "prd_executor"
 if (-not (Test-Path $executorDest)) {
-  New-Item -ItemType Directory -Force -Path $TARGET_SKILLS | Out-Null
-  Copy-Item -Recurse "$PRD_WORKFLOW_ROOT\prd_executor" $executorDest
+  New-Item -ItemType Directory -Force -Path $TargetSkills | Out-Null
+  Copy-Item -Recurse $ExecutorSrc $executorDest
   Write-Host "✓ prd_executor installed → $executorDest"
 }
 
 # 2. Initialize breakdown directory and README
-& "$PRD_WORKFLOW_ROOT\prd_decomposer\scripts\generate_readme.ps1" `
+& (Join-Path $ScriptsDir "generate_readme.ps1") `
   -TargetDir "[TARGET_PROJECT]\docs\[Feature_Name]_breakdown" `
   -FeatureName "[Feature Name]"
 ```
