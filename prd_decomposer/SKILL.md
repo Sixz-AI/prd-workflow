@@ -75,12 +75,12 @@ Before generating any files, ask the user for the target project path — the pr
 
 > "请提供目标项目的绝对路径（prd_executor skill 和 breakdown 文档将直接输出到该项目）。如果未提供，将输出到当前工作区的 `docs/` 目录下。"
 
-Once confirmed, locate this skill repository and run the setup:
+Once confirmed, locate this skill repository and run the setup.
+
+**macOS / Linux:**
 
 ```bash
 # Detect prd-workflow repo location
-# Skills installed via install.sh are in [project]/.claude/skills/
-# Check where prd_executor lives (sibling to prd_decomposer)
 PRD_WORKFLOW_ROOT=""
 for CANDIDATE in \
   "$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")/../.." 2>/dev/null && pwd)" \
@@ -92,7 +92,7 @@ for CANDIDATE in \
   fi
 done
 
-# 1. Copy prd_executor skill into the target project (skip if already exists)
+# 1. Copy prd_executor into the target project (skip if already exists)
 TARGET_SKILLS="[TARGET_PROJECT]/.claude/skills"
 if [ ! -d "$TARGET_SKILLS/prd_executor" ]; then
   mkdir -p "$TARGET_SKILLS"
@@ -103,6 +103,32 @@ fi
 # 2. Initialize breakdown directory and README
 bash "$PRD_WORKFLOW_ROOT/prd_decomposer/scripts/generate_readme.sh" \
   "[TARGET_PROJECT]/docs/[Feature_Name]_breakdown" "[Feature Name]"
+```
+
+**Windows (PowerShell):**
+
+```powershell
+# Detect prd-workflow repo location
+$PRD_WORKFLOW_ROOT = @(
+  (Join-Path $PSScriptRoot "..\.." | Resolve-Path -ErrorAction SilentlyContinue),
+  "$HOME\Documents\code\ai\prd-workflow",
+  (Join-Path (Get-Location) ".claude\skills\..")
+) | Where-Object { $_ -and (Test-Path "$_\prd_executor") -and (Test-Path "$_\prd_decomposer") } |
+    Select-Object -First 1
+
+# 1. Copy prd_executor into the target project (skip if already exists)
+$TARGET_SKILLS = "[TARGET_PROJECT]\.claude\skills"
+$executorDest = Join-Path $TARGET_SKILLS "prd_executor"
+if (-not (Test-Path $executorDest)) {
+  New-Item -ItemType Directory -Force -Path $TARGET_SKILLS | Out-Null
+  Copy-Item -Recurse "$PRD_WORKFLOW_ROOT\prd_executor" $executorDest
+  Write-Host "✓ prd_executor installed → $executorDest"
+}
+
+# 2. Initialize breakdown directory and README
+& "$PRD_WORKFLOW_ROOT\prd_decomposer\scripts\generate_readme.ps1" `
+  -TargetDir "[TARGET_PROJECT]\docs\[Feature_Name]_breakdown" `
+  -FeatureName "[Feature Name]"
 ```
 
 All subsequent output (outline.md, reqs/) goes into `[TARGET_PROJECT]/docs/[Feature_Name]_breakdown/`.
