@@ -36,87 +36,141 @@ Extract:
 
 Announce to the user: which REQs are pending, which (if any) are already in progress or done.
 
-### Step 2: Select Next REQ
+### Step 2: Select Next Phase
 
-Find the first REQ with status ⬜ (not started) whose dependencies are all ✅ Done or ⚠️ Partial.
+Find the first Phase in `outline.md` whose status is ⬜ (not started) and whose REQ dependencies (if any cross-Phase) are all ✅ or ⚠️.
 
-If no such REQ exists:
-- If all REQs are ✅ or ⚠️: announce completion, run `git push` for any unpushed Phase, done.
-- If some REQs are 🚧 In Progress: resume the in-progress REQ from Step 3.
-- If some REQs are 🚫 Shelved: skip them, find next eligible REQ.
+If no such Phase exists:
+- If all Phases are ✅: announce completion, done.
+- If a Phase is 💬 or 🔍 or 🚧 or 🧪: resume that Phase from the appropriate stage below.
 
-### Step 3: Requirements Confirmation [HARD GATE 1]
+---
 
-Open the REQ file. Locate the `🔍 详细需求确认` section.
+### Stage A: Discussion — Discuss All REQs in the Phase [HARD GATE 1]
 
-**Check:** Does the section still contain the `⚠️ [待填充]` placeholder text?
+1. Update Phase status in `outline.md` to 💬 (Discussing)
+2. For each REQ in this Phase, in order:
+   a. Open the REQ file. Check whether `🔍 详细需求确认` still contains `⚠️ [待填充]`.
+   b. If YES (placeholder present):
+      - Update REQ status in REQ file and `outline.md` to 💬
+      - Invoke `superpowers:brainstorming` with the REQ content as context
+      - Ensure ALL 10 closure dimensions are addressed:
+        - API closure
+        - Business logic closure
+        - UI/UX closure
+        - Error handling closure
+        - Data consistency closure
+        - Permission/security closure
+        - Performance boundary closure
+        - Testing closure (unit test scenarios + manual UAT checkpoints)
+        - Analytics/tracking closure
+        - Compatibility closure
+      - Replace the entire `⚠️ [待填充]` placeholder block with the brainstorming conclusions
+   c. If NO (placeholder already replaced): skip brainstorming for this REQ.
+3. **YOU ARE FORBIDDEN FROM WRITING ANY IMPLEMENTATION CODE DURING STAGE A**
 
-**If YES (placeholder present — confirmation not done):**
+---
 
-1. Update REQ file status from ⬜ to 💬 (Discussing)
-2. Update the matching row in `outline.md` Status column to 💬
-3. Invoke `superpowers:brainstorming` with the REQ content as context
-4. During brainstorming, ensure ALL 10 closure dimensions are addressed:
-   - API closure
-   - Business logic closure
-   - UI/UX closure
-   - Error handling closure
-   - Data consistency closure
-   - Permission/security closure
-   - Performance boundary closure
-   - Testing closure (unit test scenarios + manual UAT checkpoints)
-   - Analytics/tracking closure
-   - Compatibility closure
-5. After brainstorming completes, replace the entire placeholder block with the analysis conclusions
-6. **YOU ARE FORBIDDEN FROM WRITING ANY IMPLEMENTATION CODE UNTIL THE PLACEHOLDER IS REPLACED**
+### Stage B: Summary Confirmation
 
-**If NO (placeholder already replaced — confirmation done):**
-Skip to Step 4.
+1. Update Phase status in `outline.md` to 🔍 (Pending Confirmation)
+2. Present a summary of all REQ discussion conclusions to the user:
 
-### Step 4: Begin Implementation
-
-1. Update REQ file status from 💬 to 🚧 (In Progress)
-2. Update the matching row in `outline.md` Status column to 🚧
-3. Invoke `superpowers:test-driven-development` with the REQ's Acceptance Criteria as the test targets
-
-**Do NOT commit during:**
-- Debug sessions
-- Mock data setup
-- Adding/removing console.log or temporary logging
-- WIP features that don't yet pass acceptance criteria
-
-### Step 5: Complete REQ [HARD GATE 2]
-
-When the REQ's main functionality is done and acceptance criteria are met:
-
-1. Update REQ file status:
-   - **✅ Done** — all Acceptance Criteria verified by manual UAT
-   - **⚠️ Partial** — main feature works, some AC items shelved (write reason in 备注 field)
-   - **🚫 Shelved** — blocked entirely (write reason in 备注 field, move to next REQ)
-
-2. Update the matching row in `outline.md` Status column to match
-
-3. Update the `最后更新` field in the REQ file's 执行状态 table to today's date
-
-4. Commit:
-   ```bash
-   git add -p   # stage only implementation files, NOT debug/mock artifacts
-   git commit -m "feat(REQ-X.X): [short description of what was built]"
+   ```
+   Phase X Discussion Summary:
+   - REQ-X.1 [Title]: [2-3 key conclusions]
+   - REQ-X.2 [Title]: [2-3 key conclusions]
+   - REQ-X.3 [Title]: [2-3 key conclusions]
    ```
 
-### Step 6: Check Phase Completion
+3. Ask the user: **"Does the above look correct? Ready to start implementation?"**
+4. Wait for the user's response:
+   - **Confirmed** → proceed to Stage C
+   - **Revision requested for a specific REQ** → re-run brainstorming for that REQ only, update its conclusions in the REQ file, re-present the full summary, then repeat step 3 (wait for confirmation again)
 
-After each commit, inspect the Phase that contains the just-completed REQ.
+---
 
-**All REQs in Phase are ✅ or ⚠️?**
+### Stage C: Implementation — Implement All REQs Autonomously
 
-Yes → Push:
-```bash
-git push
-```
-Then return to Step 2 for the next Phase.
+1. Update Phase status in `outline.md` to 🚧 (Implementing)
+2. For each REQ in this Phase, in order:
+   a. Update REQ status in REQ file and `outline.md` to 🚧 (In Progress)
+   b. Invoke `superpowers:test-driven-development` with the REQ's Acceptance Criteria as test targets
+   c. When Acceptance Criteria pass internally: keep REQ status as 🚧 — it will be updated to ✅ in Stage G after the user passes UAT
+   d. Commit immediately after each REQ:
+      ```bash
+      git add -p   # stage only implementation files, NOT debug/mock artifacts
+      git commit -m "feat(REQ-X.X): [short description of what was built]"
+      ```
+3. **DO NOT interrupt the user at any point during Stage C**
+4. **Do NOT commit during:** debug sessions, mock data setup, adding/removing console.log, WIP that doesn't pass AC
 
-No → Return to Step 2 for the next REQ in this Phase.
+---
+
+### Stage D: UAT Notification
+
+1. Update Phase status in `outline.md` to 🧪 (Pending UAT)
+2. Generate a UAT checklist from each REQ's Acceptance Criteria:
+
+   ```
+   Phase X UAT Checklist:
+
+   REQ-X.1 [Title]
+   Please verify:
+   - [ ] [AC item 1]
+   - [ ] [AC item 2]
+
+   REQ-X.2 [Title]
+   Please verify:
+   - [ ] [AC item 1]
+   - [ ] [AC item 2]
+   ```
+
+3. Notify the user: "All REQs in Phase X are implemented. Please verify each item in the checklist above and report which REQs pass or fail (with reason for failures)."
+
+---
+
+### Stage E: User UAT
+
+Wait for the user to report results. While waiting, keep Phase status as 🧪 (Pending UAT) and do not modify any code. Expected format (user can use any natural language):
+- "REQ-X.1 pass, REQ-X.2 fail — [reason]"
+
+---
+
+### Stage F: Fix Loop (failing REQs only)
+
+For each REQ the user reports as failing:
+1. **Do NOT re-run brainstorming** — go straight to fixing based on user feedback
+2. Fix the implementation
+3. Re-generate the UAT checklist for that REQ only:
+
+   ```
+   REQ-X.2 [Title] — Fixed. Please re-verify:
+   - [ ] [AC item 1]
+   - [ ] [AC item 2]
+   ```
+
+4. Ask the user to re-verify only this REQ
+5. Repeat until this REQ passes
+6. REQs that already passed are not touched
+7. When all previously-failing REQs have now passed, proceed to Stage G
+
+---
+
+### Stage G: Phase Completion
+
+When all REQs in the Phase have passed UAT:
+1. Update each REQ file status:
+   - **✅ Done** — all Acceptance Criteria verified by user UAT
+   - **⚠️ Partial** — main feature works, some AC items shelved (write reason in 备注 field)
+2. Update the matching rows in `outline.md`
+3. Update the `最后更新` field in each REQ file to today's date
+4. Update Phase status in `outline.md` to ✅ (Complete)
+5. Push:
+   ```bash
+   git push
+   ```
+6. Return to Step 2 for the next Phase
 
 ---
 
@@ -131,6 +185,17 @@ No → Return to Step 2 for the next REQ in this Phase.
 | Done | ✅ | All Acceptance Criteria verified |
 | Partial | ⚠️ | Main feature done, some AC items shelved (reason in 备注) |
 | Shelved | 🚫 | Blocked, see 备注 for reason |
+
+## Phase Status Reference
+
+| Status | Emoji | Meaning |
+| ------ | ----- | ------- |
+| Not Started | ⬜ | Default |
+| Discussing | 💬 | Brainstorming REQs in progress |
+| Pending Confirmation | 🔍 | All REQs discussed, waiting for user sign-off |
+| Implementing | 🚧 | AI implementing all REQs autonomously |
+| Pending UAT | 🧪 | Waiting for user verification |
+| Complete | ✅ | All REQs passed UAT, pushed |
 
 ## Handling Requirements Changes (🔄)
 
