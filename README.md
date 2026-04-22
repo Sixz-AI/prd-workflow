@@ -32,14 +32,14 @@ This workflow forces:
 ### macOS / Linux
 
 ```bash
-git clone https://github.com/code60-AI/prd-workflow.git
+git clone https://github.com/Sixz-AI/prd-workflow.git
 bash prd-workflow/install.sh /path/to/your-project
 ```
 
 ### Windows (PowerShell)
 
 ```powershell
-git clone https://github.com/code60-AI/prd-workflow.git
+git clone https://github.com/Sixz-AI/prd-workflow.git
 .\prd-workflow\install.ps1 -Target C:\path\to\your-project
 ```
 
