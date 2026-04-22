@@ -42,7 +42,7 @@ Find the first Phase in `outline.md` whose status is ⬜ (not started) and whose
 
 If no such Phase exists:
 - If all Phases are ✅: announce completion, done.
-- If a Phase is 🚧 or 🔍 or 🧪: resume that Phase from the appropriate stage below.
+- If a Phase is 💬 or 🔍 or 🚧 or 🧪: resume that Phase from the appropriate stage below.
 
 ---
 
@@ -86,7 +86,7 @@ If no such Phase exists:
 3. Ask the user: **"Does the above look correct? Ready to start implementation?"**
 4. Wait for the user's response:
    - **Confirmed** → proceed to Stage C
-   - **Revision requested for a specific REQ** → re-run brainstorming for that REQ only, update its conclusions in the REQ file, then re-present the full summary
+   - **Revision requested for a specific REQ** → re-run brainstorming for that REQ only, update its conclusions in the REQ file, re-present the full summary, then repeat step 3 (wait for confirmation again)
 
 ---
 
@@ -96,7 +96,7 @@ If no such Phase exists:
 2. For each REQ in this Phase, in order:
    a. Update REQ status in REQ file and `outline.md` to 🚧 (In Progress)
    b. Invoke `superpowers:test-driven-development` with the REQ's Acceptance Criteria as test targets
-   c. When Acceptance Criteria pass internally: keep REQ status as 🚧 (updated to ✅ after user UAT)
+   c. When Acceptance Criteria pass internally: keep REQ status as 🚧 — it will be updated to ✅ in Stage G after the user passes UAT
    d. Commit immediately after each REQ:
       ```bash
       git add -p   # stage only implementation files, NOT debug/mock artifacts
@@ -132,7 +132,7 @@ If no such Phase exists:
 
 ### Stage E: User UAT
 
-Wait for the user to report results. Expected format (user can use any natural language):
+Wait for the user to report results. While waiting, keep Phase status as 🧪 (Pending UAT) and do not modify any code. Expected format (user can use any natural language):
 - "REQ-X.1 pass, REQ-X.2 fail — [reason]"
 
 ---
@@ -153,6 +153,7 @@ For each REQ the user reports as failing:
 4. Ask the user to re-verify only this REQ
 5. Repeat until this REQ passes
 6. REQs that already passed are not touched
+7. When all previously-failing REQs have now passed, proceed to Stage G
 
 ---
 
