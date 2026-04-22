@@ -18,20 +18,14 @@ echo ""
 mkdir -p "$SKILLS_DIR"
 
 # prd_decomposer
-if [ -d "$SKILLS_DIR/prd_decomposer" ]; then
-  echo "⚠  prd_decomposer already exists — skipping."
-else
-  cp -r "$REPO_DIR/prd_decomposer" "$SKILLS_DIR/prd_decomposer"
-  echo "✓  prd_decomposer → $SKILLS_DIR/prd_decomposer"
-fi
+rm -rf "$SKILLS_DIR/prd_decomposer"
+cp -r "$REPO_DIR/prd_decomposer" "$SKILLS_DIR/prd_decomposer"
+echo "✓  prd_decomposer → $SKILLS_DIR/prd_decomposer"
 
 # prd_executor
-if [ -d "$SKILLS_DIR/prd_executor" ]; then
-  echo "⚠  prd_executor already exists — skipping."
-else
-  cp -r "$REPO_DIR/prd_executor" "$SKILLS_DIR/prd_executor"
-  echo "✓  prd_executor → $SKILLS_DIR/prd_executor"
-fi
+rm -rf "$SKILLS_DIR/prd_executor"
+cp -r "$REPO_DIR/prd_executor" "$SKILLS_DIR/prd_executor"
+echo "✓  prd_executor → $SKILLS_DIR/prd_executor"
 
 echo ""
 echo "Done. Restart Claude Code in $TARGET to activate the skills."
